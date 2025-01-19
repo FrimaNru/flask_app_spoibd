@@ -84,16 +84,6 @@ def stop_message(message):
     else:
         bot.reply_to(message, 'Отправка фактов не активна.')
 
-# Обработчик текстовых сообщений
-@bot.message_handler(func=lambda message: True)
-def handle_message(message):
-    save_message_to_db(message)  # Сохранение каждого сообщения в базу данных
-    if message.text.lower() == "стоп":
-        bot.reply_to(message, "Остановлено! Спасибо за использование.")
-    else:
-        response = random.choice(["Ты угадал!", "Попробуй снова!", "Интересная попытка!"])
-        bot.reply_to(message, response)
-
 # Запуск бота в отдельном потоке
 def run_bot():
     with app.app_context():
