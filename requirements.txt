@@ -1,0 +1,8 @@
+Flask
+Flask-SQLAlchemy
+Flask-WTF
+Flask-Bcrypt
+Flask-Login
+requests
+BeautifulSoup4
+pymysql
