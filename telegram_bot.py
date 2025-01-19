@@ -1,6 +1,6 @@
 import telebot
 from extensions import db
-from models import BotMessage  # Импорт модели для сохранения сообщений
+from models import BotMessage, Fact   # Импорт модели для сохранения сообщений
 import threading
 import random
 import time
@@ -42,28 +42,47 @@ def start_message(message):
     save_message_to_db(message)  # Сохранение команды в базу данных
     random_start_msg = random.choice(list(random_phrases.values()))
     bot.reply_to(message, random_start_msg)
+    
+# Глобальный словарь для отслеживания активных потоков
+active_threads = {}
 
-# Отправка случайных фактов из базы данных
 def send_random_fact_from_db(chat_id):
+    print("Запуск потока для отправки фактов...")
     with app.app_context():
-        while True:
+        while active_threads.get(chat_id, False):  # Проверяем состояние флага
             try:
-                facts = BotMessage.query.filter(BotMessage.message_type == 'fact').all()
+                facts = Fact.query.all()
+                print(f"Найдено фактов: {len(facts)}")
                 if facts:
-                    random_fact = random.choice(facts).message_text
+                    random_fact = random.choice(facts).text
+                    print(f"Отправка факта: {random_fact}")
                     bot.send_message(chat_id, f'Интересный факт: {random_fact}')
-                time.sleep(10)
+                time.sleep(10)  # Интервал между отправкой фактов
             except Exception as e:
                 print(f"Ошибка при чтении фактов из базы данных: {e}")
                 break
+    print(f"Поток для чата {chat_id} остановлен.")
 
 # Обработчик команды /facts
 @bot.message_handler(commands=['facts'])
 def facts_message(message):
-    save_message_to_db(message)  # Сохранение команды в базу данных
     chat_id = message.chat.id
-    threading.Thread(target=send_random_fact_from_db, args=(chat_id,)).start()
-    bot.reply_to(message, 'Я начну присылать тебе интересные факты!')
+    if active_threads.get(chat_id, False):
+        bot.reply_to(message, 'Отправка фактов уже запущена! Чтобы остановить, напишите /stop.')
+    else:
+        active_threads[chat_id] = True  # Устанавливаем флаг для данного чата
+        threading.Thread(target=send_random_fact_from_db, args=(chat_id,)).start()
+        bot.reply_to(message, 'Я начну присылать тебе интересные факты с интервалом в 10 секунд! Для того чтобы остановить отправку напиши /stop')
+
+# Обработчик команды /stop
+@bot.message_handler(commands=['stop'])
+def stop_message(message):
+    chat_id = message.chat.id
+    if active_threads.get(chat_id, False):
+        active_threads[chat_id] = False  # Устанавливаем флаг в False, чтобы остановить поток
+        bot.reply_to(message, 'Отправка фактов остановлена! Спасибо, что использовали меня.')
+    else:
+        bot.reply_to(message, 'Отправка фактов не активна.')
 
 # Обработчик текстовых сообщений
 @bot.message_handler(func=lambda message: True)
