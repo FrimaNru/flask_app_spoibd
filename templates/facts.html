@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Факты о воде</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Шапка -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Zvir & Severova WEB</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/dashboard">Главная</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/facts">Факты в бд</a>
+                    </li>
+                    {% if user.role == 'руководитель' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/statistics">Статистика</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="text-white me-3">Роль: {{ user.role }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">Выйти</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="my-4">Интересные факты о воде</h1>
+
+        <form action="/facts" method="POST">
+            <div class="input-group mb-3">
+                <input type="text" name="fact_text" class="form-control" placeholder="Введите новый факт" required>
+                <button class="btn btn-primary" type="submit">Добавить факт</button>
+            </div>
+        </form>
+
+        <h2>Существующие факты:</h2>
+        <ul class="list-group">
+            {% for fact in facts %}
+            <li class="list-group-item d-flex justify-content-between">
+                {{ fact.text }}
+                <button class="btn btn-danger btn-sm" onclick="deleteFact('{{ fact.id }}')">Удалить</button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <script>
+        function deleteFact(factId) {
+            fetch(`/delete_fact/${factId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ fact_id: factId })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert("Ошибка при удалении факта");
+                    }
+                });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js"></script>
+</body>
+
+</html>

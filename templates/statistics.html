@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistics</title>
+    <!-- Добавление Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Zvir & Severova WEB</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/dashboard">Главная</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/facts">Факты в бд</a>
+                    </li>
+                    {% if user.role == 'руководитель' %}
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/statistics">Статистика</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="text-white me-3">Роль: {{ user.role }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">Выйти</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1>Статистика</h1>
+
+        <!-- Навигационные табы -->
+        <ul class="nav nav-tabs" id="statisticsTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="messagesByDay-tab" data-bs-toggle="tab" href="#messagesByDay" role="tab" aria-controls="messagesByDay" aria-selected="true">Сообщения по дням</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="userActivity-tab" data-bs-toggle="tab" href="#userActivity" role="tab" aria-controls="userActivity" aria-selected="false">Активность пользователей</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="commandUsage-tab" data-bs-toggle="tab" href="#commandUsage" role="tab" aria-controls="commandUsage" aria-selected="false">Использование команд</a>
+            </li>
+        </ul>
+
+        <!-- Контент табов -->
+        <div class="tab-content mt-3" id="statisticsTabsContent">
+            <!-- Сообщения по дням -->
+            <div class="tab-pane fade show active" id="messagesByDay" role="tabpanel" aria-labelledby="messagesByDay-tab">
+                <h3>Сообщения по дням</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Количество сообщений</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for date, count in daily_data %}
+                            <tr>
+                                <td>{{ date }}</td>
+                                <td>{{ count }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="2">Нет данных</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Активность пользователей -->
+            <div class="tab-pane fade" id="userActivity" role="tabpanel" aria-labelledby="userActivity-tab">
+                <h3>Активность пользователей</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Пользователь</th>
+                            <th>Количество сообщений</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for username, count in user_data %}
+                            <tr>
+                                <td>{{ username }}</td>
+                                <td>{{ count }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="2">Нет данных</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Использование команд -->
+            <div class="tab-pane fade" id="commandUsage" role="tabpanel" aria-labelledby="commandUsage-tab">
+                <h3>Использование команд</h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Команда</th>
+                            <th>Количество использований</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for command, count in command_data %}
+                            <tr>
+                                <td>{{ command }}</td>
+                                <td>{{ count }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="2">Нет данных</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Дополнительная информация -->
+        <h2>Общая информация:</h2>
+        <ul class="list-group">
+            <li class="list-group-item">Количество пользователей: {{ user_count }}</li>
+            <li class="list-group-item">Количество команд: {{ command_count }}</li>
+        </ul>
+    </div>
+
+    <!-- Подключение Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
