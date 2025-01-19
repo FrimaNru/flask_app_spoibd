@@ -6,3 +6,4 @@ Flask-Login
 requests
 BeautifulSoup4
 pymysql
+telebot
